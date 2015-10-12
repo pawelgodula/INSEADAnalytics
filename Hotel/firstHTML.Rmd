@@ -1,0 +1,55 @@
+---
+title: "FirstHTML"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, echo=FALSE}
+#################################################### 
+### INITIAL ANALYSIS
+####################################################
+
+
+### 1. Loading and cleaning the data 
+
+ReserveData = read.csv2(
+  "C:/Users/PawelG/Desktop/MBA/E hotel/tabela z danymi/R data/Wykaz rezerwacji_PG.csv", 
+  sep = ",", header = TRUE)
+
+newnames = c("Idx", "IdKey", "OrderDate", "Client", "Type", "RoomNr", "StayPeriod", 
+             "Check", "Allotment", "ExpValue", "ExpCount", "RealValue", "RealCount")
+colnames(ReserveData) = newnames
+rownames(ReserveData) = ReserveData[,"Idx"]
+
+rData = ReserveData
+rData = rData[, colnames(rData) != "Allotment"]
+SP = rData[,"StayPeriod"]
+SPstart = substr(SP, 1, 10)
+SPend = substr(SP, 14, 23)
+
+rData = cbind(cbind(rData,SPstart), SPend)
+
+#write.csv2(rData, file = "C:/Users/PawelG/Desktop/MBA/E hotel/tabela z danymi/R data/rDataTest.csv")
+
+
+### 2. Calculating price per apartment
+ppNight = as.numeric(as.vector(rData[,"RealValue"])) / rData[,"RealCount"]
+rData = cbind(rData, ppNight)
+rData = rData[ppNight != "NaN",]
+rData = rData[rData[,"ppNight"] != 0,] 
+
+rTypes = sort(as.vector(unique(rData[,"Type"])))
+rTypes
+
+```
+
+You can also embed plots, for example:
+
+```{r}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
